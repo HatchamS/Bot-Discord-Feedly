@@ -16,20 +16,23 @@ CreateChannel = async (GuildChannelManager,NameNewChannel,idCategoryChannel,type
   newChannel.setParent(idCategoryChannel);
 }
 
-Main = async (listChannel)=> {
+Main = async (listChannel,listNewChannel)=> {
   let CategoryChannelId = await GetIdChannelByName(categoryName,listChannel.fetch());
-  CreateChannel(listChannel,"coucou",CategoryChannelId,textChannel);
-
+  listNewChannel.forEach(element => {
+    CreateChannel(listChannel,element,CategoryChannelId,textChannel);
+  });
+  
 }
 
 bot.on('ready',  () =>{
   const serv = bot.guilds.cache;
   const guildID = serv.keys().next().value;
   const ChannelsServer=serv.get(guildID).channels;
-  Main(ChannelsServer);
+
+  let array=["bonjours","coucou"]  
+  Main(ChannelsServer,array);
   
 })
-
 
 
 bot.login(config.BotToken);
