@@ -23,28 +23,27 @@ GetAllIdChildren = (categoryChannel) =>{
   return ListNameChildren;
 }
 
-Main = async (listChannel,listNewChannel)=> {
+ManageChannel = async (listChannel,listNewChannel)=> {
   let CategoryChannel = await GetTargetChannelByName(categoryName,listChannel.fetch());
   let arrayChildrenName = GetAllIdChildren(CategoryChannel);
   
   listNewChannel.forEach(element => {
-    
     if (!arrayChildrenName.includes(element)){
       CreateChannel(listChannel,element,CategoryChannel.id,textChannel);
     }else{
       console.log(element+" existe déjà dans le salon "+categoryName);
     }
-    
   });
-  
+  return 0;
 }
 
 bot.on('ready',  () =>{
   const serv = bot.guilds.cache;
   const guildID = serv.keys().next().value;
   const ChannelsServer=serv.get(guildID).channels;
-  let array=[]  
-  Main(ChannelsServer,array);
+
+  let array=["troll"];  
+  ManageChannel(ChannelsServer,array).then(() => bot.destroy())
   
 })
 
