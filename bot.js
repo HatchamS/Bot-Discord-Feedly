@@ -4,9 +4,9 @@ const categoryName="NEW";
 const textChannel ="GUILD_TEXT";
 const config = require('./config.json');
 
-GetTargetChannelByName = async (categoryName,FetchRequest) => {
+GetTargetChannelByName = async (Name,FetchRequest) => {
   let listeChannel= await FetchRequest; 
-  let Channel = listeChannel.find(chanenel=>chanenel.name==categoryName);
+  let Channel = listeChannel.find(chanenel=>chanenel.name==Name);
   return Channel;
 }
 
@@ -34,18 +34,23 @@ ManageChannel = async (listChannel,listNewChannel)=> {
       console.log(element+" existe déjà dans le salon "+categoryName);
     }
   });
+  return CategoryChannel.id;
+}
+SendAllMessageToChannel = async (ActiveChannel,targetNameChannel,content,guildChannel,parenid) => {
+  let TargetChannel = await GetTargetChannelByName(targetNameChannel,guildChannel)
+  let ChannelToSendMessage=ActiveChannel.find(channel=>channel.id===TargetChannel.id & channel.parentId===parenid)
+  await ChannelToSendMessage.send(content)
   return 0;
 }
-
 bot.on('ready',  () =>{
   const serv = bot.guilds.cache;
   const guildID = serv.keys().next().value;
-  const ChannelsServer=serv.get(guildID).channels;
 
-  let array=["troll"];  
-  ManageChannel(ChannelsServer,array).then(() => bot.destroy())
-  
+  let array=[];  
+  ManageChannel(serv.get(guildID).channels,array).then((idparent) => {
+    let allActiveChannel=bot.channels.cache
+    SendAllMessageToChannel(allActiveChannel,"coucou","C'est un message",serv.get(guildID).channels.fetch(),idparent)
+    })
 })
-
 
 bot.login(config.BotToken);
