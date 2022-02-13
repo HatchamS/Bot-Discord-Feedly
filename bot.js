@@ -15,17 +15,17 @@ CreateChannel = async (GuildChannelManager,NameNewChannel,idCategoryChannel,type
   newChannel.setParent(idCategoryChannel);
 }
 
-GetAllIdChildren = (categoryChannel) =>{
+GetAllChildren = (categoryChannel,property) =>{
   let ListNameChildren=[];
   categoryChannel.children.forEach((e)=>{
-    ListNameChildren.push(e.name);
+    ListNameChildren.push(e[property]);
   })
   return ListNameChildren;
 }
 
 ManageChannel = async (listChannel,listNewChannel)=> {
   let CategoryChannel = await GetTargetChannelByName(categoryName,listChannel.fetch());
-  let arrayChildrenName = GetAllIdChildren(CategoryChannel);
+  let arrayChildrenName = GetAllChildren(CategoryChannel,"name");
   
   listNewChannel.forEach(element => {
     if (!arrayChildrenName.includes(element)){
@@ -34,11 +34,10 @@ ManageChannel = async (listChannel,listNewChannel)=> {
       console.log(element+" existe déjà dans le salon "+categoryName);
     }
   });
-  return CategoryChannel.id;
+  return CategoryChannel;
 }
-SendAllMessageToChannel = async (ActiveChannel,targetNameChannel,content,guildChannel,parenid) => {
-  let TargetChannel = await GetTargetChannelByName(targetNameChannel,guildChannel)
-  let ChannelToSendMessage=ActiveChannel.find(channel=>channel.id===TargetChannel.id & channel.parentId===parenid)
+SendAllMessageToChannel = async (ActiveChannel,AllIdchildrenChannel,content,) => {
+  let ChannelToSendMessage= await ActiveChannel.fetch(AllIdchildrenChannel[0])
   await ChannelToSendMessage.send(content)
   return 0;
 }
@@ -46,10 +45,10 @@ bot.on('ready',  () =>{
   const serv = bot.guilds.cache;
   const guildID = serv.keys().next().value;
 
-  let array=[];  
-  ManageChannel(serv.get(guildID).channels,array).then((idparent) => {
-    let allActiveChannel=bot.channels.cache
-    SendAllMessageToChannel(allActiveChannel,"coucou","C'est un message",serv.get(guildID).channels.fetch(),idparent)
+  let array=["troll"];  
+  ManageChannel(serv.get(guildID).channels,array).then((parent) => {
+    let allActiveChannelChildrenId=GetAllChildren(parent,"id")
+    SendAllMessageToChannel(bot.channels,allActiveChannelChildrenId,"C'est un message")
     })
 })
 
