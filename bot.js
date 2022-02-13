@@ -34,22 +34,45 @@ ManageChannel = async (listChannel,listNewChannel)=> {
       console.log(element+" existe déjà dans le salon "+categoryName);
     }
   });
-  return CategoryChannel;
+  return 0;
 }
 SendAllMessageToChannel = async (ActiveChannel,AllIdchildrenChannel,content,) => {
-  let ChannelToSendMessage= await ActiveChannel.fetch(AllIdchildrenChannel[0])
+  let ChannelToSendMessage= await ActiveChannel.fetch(AllIdchildrenChannel[1])
   await ChannelToSendMessage.send(content)
   return 0;
 }
-bot.on('ready',  () =>{
-  const serv = bot.guilds.cache;
-  const guildID = serv.keys().next().value;
 
-  let array=["troll"];  
-  ManageChannel(serv.get(guildID).channels,array).then((parent) => {
-    let allActiveChannelChildrenId=GetAllChildren(parent,"id")
-    SendAllMessageToChannel(bot.channels,allActiveChannelChildrenId,"C'est un message")
-    })
+const sleep = (milliseconds) => {
+  return new Promise(resolve => setTimeout(resolve, milliseconds))
+}
+async function Main(array,Client){
+  
+  let serv=Client.guilds.cache;
+  let guildID = Client.guilds.cache.keys().next().value;
+  let ChannelsClient=Client.channels;
+  let Request = serv.get(guildID).channels
+  
+  
+  
+  await ManageChannel(Request,array);
+  sleep(5000).then(async () => {
+    let refrechParent = await GetTargetChannelByName(categoryName, serv.get(guildID).channels.fetch());
+    let refrechChildrenId = GetAllChildren(refrechParent,"id");
+  
+  
+    SendAllMessageToChannel(Client.channels,refrechChildrenId ,"C'est un message");
+
+    
+  })
+
+  
+
+
+}
+
+bot.on('ready',  () =>{
+  let NewChannel=["coucou","troll"];
+  Main(NewChannel,bot);
 })
 
 bot.login(config.BotToken);
