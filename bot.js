@@ -45,7 +45,7 @@ CreateAllChilldrenNeed = (listChannel,listNewChannel,Request)=> {
       }
     })
     while (numberchildren !== targetNumberChannel) {
-      var numberchildren = CategoryChannel.children.size;
+      numberchildren = CategoryChannel.children.size;
       await sleep(1000)
       
     }
@@ -80,7 +80,7 @@ async function Main(array,Client){
 }
 
 bot.on('ready',  () =>{
-   let NewChannel=["coucou"];
+   let NewChannel=["coucou","qdqsdq","dqfsd","dfsdf","dsfds"];
   Main(NewChannel,bot);
 })
 
