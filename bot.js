@@ -44,10 +44,7 @@ CreateAllChilldrenNeed = (listChannel,listNewChannel,Request)=> {
         console.log(element+" existe déjà dans le salon "+categoryName);
       }
     })
-    //console.log(numberchildren,targetNumberChannel)
     while (numberchildren !== targetNumberChannel) {
-      let RequestFetch = await Request.fetch()
-      let CategoryChannel = await GetTargetChannelByName(categoryName,RequestFetch);
       var numberchildren = CategoryChannel.children.size;
       await sleep(1000)
       
@@ -61,7 +58,7 @@ CreateAllChilldrenNeed = (listChannel,listNewChannel,Request)=> {
   })
 }
 SendAllMessageToChannel = async (ActiveChannel,AllIdchildrenChannel,content,) => {
-  let ChannelToSendMessage= await ActiveChannel.fetch(AllIdchildrenChannel[1])
+  let ChannelToSendMessage= await ActiveChannel.fetch(AllIdchildrenChannel[4])
   await ChannelToSendMessage.send(content)
   return 0;
 }
@@ -83,7 +80,7 @@ async function Main(array,Client){
 }
 
 bot.on('ready',  () =>{
-   let NewChannel=["coucou","troll"];
+   let NewChannel=["coucou"];
   Main(NewChannel,bot);
 })
 
