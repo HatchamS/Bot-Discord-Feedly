@@ -23,18 +23,15 @@ GetAllChildren = (categoryChannel,property) =>{
   return ListNameChildren;
 }
 
-ManageChannel = async (listChannel,listNewChannel)=> {
-  let CategoryChannel = await GetTargetChannelByName(categoryName,listChannel.fetch());
-  let arrayChildrenName = GetAllChildren(CategoryChannel,"name");
-  
+CreateAllChilldrenNeed = (listChannel,listNewChannel,categoryChannel)=> {
+  let arrayChildrenName = GetAllChildren(categoryChannel,"name");
   listNewChannel.forEach(element => {
     if (!arrayChildrenName.includes(element)){
-      CreateChannel(listChannel,element,CategoryChannel.id,textChannel);
+      CreateChannel(listChannel,element,categoryChannel.id,textChannel);
     }else{
       console.log(element+" existe déjà dans le salon "+categoryName);
     }
   });
-  return 0;
 }
 SendAllMessageToChannel = async (ActiveChannel,AllIdchildrenChannel,content,) => {
   let ChannelToSendMessage= await ActiveChannel.fetch(AllIdchildrenChannel[1])
@@ -51,22 +48,16 @@ async function Main(array,Client){
   let guildID = Client.guilds.cache.keys().next().value;
   let ChannelsClient=Client.channels;
   let Request = serv.get(guildID).channels
+  let RequestFetch = await Request.fetch()
+  
+  let CategoryChannel = await GetTargetChannelByName(categoryName,RequestFetch);
   
   
+  CreateAllChilldrenNeed(Request,array,CategoryChannel);
+  await sleep(2000)
   
-  await ManageChannel(Request,array);
-  sleep(5000).then(async () => {
-    let refrechParent = await GetTargetChannelByName(categoryName, serv.get(guildID).channels.fetch());
-    let refrechChildrenId = GetAllChildren(refrechParent,"id");
-  
-  
-    SendAllMessageToChannel(Client.channels,refrechChildrenId ,"C'est un message");
-
-    
-  })
-
-  
-
+  let refrechChildrenId = GetAllChildren(CategoryChannel,"id");
+  SendAllMessageToChannel(Client.channels,refrechChildrenId ,"C'est un message");
 
 }
 
