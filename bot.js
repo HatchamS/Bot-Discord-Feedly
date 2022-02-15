@@ -3,6 +3,7 @@ const bot = new Discord.Client({intents: []});
 const categoryName="NEW";
 const textChannel ="GUILD_TEXT";
 const config = require('./config.json');
+const FeedlyApp = require("./feedly.js")
 
 
 const sleep = (milliseconds) => {
@@ -72,9 +73,9 @@ zipTwoArrayToObject=(arrayOne,arrayTwo)=>{
 }
 
 
-async function Main(DataInput,Client){
-  let sectionFeedly = Object.keys(DataInput)  
-
+async function Main(Client){
+  let sectionFeedly = await FeedlyApp.GetAllBoards(config.tokenFeedly); 
+  console.log(sectionFeedly);
   let serv=Client.guilds.cache;
   let guildID = Client.guilds.cache.keys().next().value;
   let ChannelsClient=Client.channels;
@@ -85,22 +86,17 @@ async function Main(DataInput,Client){
   await CreateAllChilldrenNeed(Request,sectionFeedly,Request);
   console.log("Création des channels terminés");
 
-  let refrechChildrenId = GetAllChildren(CategoryChannelTarget,"id");
-  let nammeChannelAndIsId = zipTwoArrayToObject(sectionFeedly,refrechChildrenId)
+  //let refrechChildrenId = GetAllChildren(CategoryChannelTarget,"id");
+  //let nammeChannelAndIsId = zipTwoArrayToObject(sectionFeedly,refrechChildrenId)
 
-  for (let [key, value] of Object.entries(DataInput)) {
-    await SendAllMessageToChannel(ChannelsClient,nammeChannelAndIsId,value,key)
-  }
-  console.log("Tous les messages envoyés");
-  Client.destroy()
+  //for (let [key, value] of Object.entries(DataInput)) {
+    //await SendAllMessageToChannel(ChannelsClient,nammeChannelAndIsId,value,key)
+  //}
+  //console.log("Tous les messages envoyés");
+  //Client.destroy()
 }
 
 bot.on('ready',  () =>{
-  let FeedlyResponce = {
-    "comics":["https://replit.com/languages/nodejs"],
-    "bd":["super nouvelleB","Autre super nouvelleB"]
-  }
-  
-  Main(FeedlyResponce,bot);
+  Main(bot);
 })
 bot.login(config.BotToken);
