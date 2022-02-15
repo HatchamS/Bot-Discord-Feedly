@@ -61,10 +61,7 @@ SendAllMessageToChannel = async (ActiveChannel,ObjectNameChannelAndId,Allmessage
   let IdTargetChannel = ObjectNameChannelAndId[nameTargetChannel];
   let ChannelToSendMessage= await ActiveChannel.fetch(IdTargetChannel);
   let FormatedMessage = AllmessageToSend.join('\n')
-  await ChannelToSendMessage.send(FormatedMessage);
-
-  
-  return 0;
+  return await ChannelToSendMessage.send(FormatedMessage);
 }
 zipTwoArrayToObject=(arrayOne,arrayTwo)=>{
   let finalObject={}
@@ -92,11 +89,10 @@ async function Main(DataInput,Client){
   let nammeChannelAndIsId = zipTwoArrayToObject(sectionFeedly,refrechChildrenId)
 
   for (let [key, value] of Object.entries(DataInput)) {
-    SendAllMessageToChannel(ChannelsClient,nammeChannelAndIsId,value,key)
+    await SendAllMessageToChannel(ChannelsClient,nammeChannelAndIsId,value,key)
   }
   console.log("Tous les messages envoyés");
-  
-
+  Client.destroy()
 }
 
 bot.on('ready',  () =>{
@@ -107,5 +103,4 @@ bot.on('ready',  () =>{
   
   Main(FeedlyResponce,bot);
 })
-
 bot.login(config.BotToken);
