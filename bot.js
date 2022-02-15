@@ -57,31 +57,37 @@ CreateAllChilldrenNeed = (listChannel,listNewChannel,Request)=> {
 
   })
 }
-SendAllMessageToChannel = async (ActiveChannel,AllIdchildrenChannel,content,) => {
-  let ChannelToSendMessage= await ActiveChannel.fetch(AllIdchildrenChannel[4])
+SendAllMessageToChannel = async (ActiveChannel,AllIdchildrenChannel,content) => {
+  let ChannelToSendMessage= await ActiveChannel.fetch(AllIdchildrenChannel[0])
   await ChannelToSendMessage.send(content)
   return 0;
 }
 
-
-async function Main(array,Client){
+async function Main(DataInput,Client){
+  let sectionFeedly = Object.keys(DataInput)
   
+
   let serv=Client.guilds.cache;
   let guildID = Client.guilds.cache.keys().next().value;
   let ChannelsClient=Client.channels;
   let Request = serv.get(guildID).channels
-  let CategoryChannelTarget = await GetTargetChannelByName(categoryName,Request.fetch(),"id")
+  
+  let CategoryChannelTarget = await GetTargetChannelByName(categoryName,Request.fetch(),"id");
 
-  await CreateAllChilldrenNeed(Request,array,Request);
-  console.log("Création des channels terminer")
+  await CreateAllChilldrenNeed(Request,sectionFeedly,Request);
+  console.log("Création des channels terminer");
   let refrechChildrenId = GetAllChildren(CategoryChannelTarget,"id");
   SendAllMessageToChannel(ChannelsClient,refrechChildrenId ,"C'est un message");
 
 }
 
 bot.on('ready',  () =>{
-   let NewChannel=["coucou","qdqsdq","dqfsd","dfsdf","dsfds"];
-  Main(NewChannel,bot);
+  let FeedlyResponce = {
+    "comics":["super nouvelle","Autre super nouvelle"],
+    "BD":["super nouvelleB","Autre super nouvelleB"]
+  }
+  
+  Main(FeedlyResponce,bot);
 })
 
 bot.login(config.BotToken);
