@@ -57,11 +57,23 @@ CreateAllChilldrenNeed = (listChannel,listNewChannel,Request)=> {
 
   })
 }
-SendAllMessageToChannel = async (ActiveChannel,AllIdchildrenChannel,content) => {
-  let ChannelToSendMessage= await ActiveChannel.fetch(AllIdchildrenChannel[0])
-  await ChannelToSendMessage.send(content)
+SendAllMessageToChannel = async (ActiveChannel,ObjectNameChannelAndId,AllmessageToSend,nameTargetChannel) => {
+  let IdTargetChannel = ObjectNameChannelAndId[nameTargetChannel];
+  let ChannelToSendMessage= await ActiveChannel.fetch(IdTargetChannel);
+  AllmessageToSend.forEach(async (message)=>{
+    await ChannelToSendMessage.send(message);
+  })
+  
   return 0;
 }
+zipTwoArrayToObject=(arrayOne,arrayTwo)=>{
+  let finalObject={}
+  arrayOne.forEach((element,index) => {
+      finalObject[element]=arrayTwo[index]
+  })
+  return finalObject
+}
+
 
 async function Main(DataInput,Client){
   let sectionFeedly = Object.keys(DataInput)
@@ -75,9 +87,16 @@ async function Main(DataInput,Client){
   let CategoryChannelTarget = await GetTargetChannelByName(categoryName,Request.fetch(),"id");
 
   await CreateAllChilldrenNeed(Request,sectionFeedly,Request);
-  console.log("Création des channels terminer");
+  console.log("Création des channels terminés");
+
   let refrechChildrenId = GetAllChildren(CategoryChannelTarget,"id");
-  SendAllMessageToChannel(ChannelsClient,refrechChildrenId ,"C'est un message");
+  let nammeChannelAndIsId = zipTwoArrayToObject(sectionFeedly,refrechChildrenId)
+
+  for (let [key, value] of Object.entries(DataInput)) {
+    SendAllMessageToChannel(ChannelsClient,nammeChannelAndIsId,value,key)
+  }
+  console.log("Tous les messages envoyés");
+  
 
 }
 
