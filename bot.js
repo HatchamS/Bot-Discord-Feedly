@@ -60,9 +60,9 @@ CreateAllChilldrenNeed = (listChannel,listNewChannel,Request)=> {
 SendAllMessageToChannel = async (ActiveChannel,ObjectNameChannelAndId,AllmessageToSend,nameTargetChannel) => {
   let IdTargetChannel = ObjectNameChannelAndId[nameTargetChannel];
   let ChannelToSendMessage= await ActiveChannel.fetch(IdTargetChannel);
-  AllmessageToSend.forEach(async (message)=>{
-    await ChannelToSendMessage.send(message);
-  })
+  let FormatedMessage = AllmessageToSend.join('\n')
+  await ChannelToSendMessage.send(FormatedMessage);
+
   
   return 0;
 }
@@ -76,8 +76,7 @@ zipTwoArrayToObject=(arrayOne,arrayTwo)=>{
 
 
 async function Main(DataInput,Client){
-  let sectionFeedly = Object.keys(DataInput)
-  
+  let sectionFeedly = Object.keys(DataInput)  
 
   let serv=Client.guilds.cache;
   let guildID = Client.guilds.cache.keys().next().value;
@@ -102,8 +101,8 @@ async function Main(DataInput,Client){
 
 bot.on('ready',  () =>{
   let FeedlyResponce = {
-    "comics":["super nouvelle","Autre super nouvelle"],
-    "BD":["super nouvelleB","Autre super nouvelleB"]
+    "comics":["https://replit.com/languages/nodejs"],
+    "bd":["super nouvelleB","Autre super nouvelleB"]
   }
   
   Main(FeedlyResponce,bot);
