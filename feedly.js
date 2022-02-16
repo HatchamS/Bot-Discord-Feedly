@@ -6,7 +6,6 @@ async function GetAllFolder(tokenApi) {
     let resultRequest = await axios.get("https://cloud.feedly.com/v3/collections",{
         headers: {'Authorization': tokenApi}
     })
-    console.log(resultRequest.data)
     return new Promise(async (resolve)=>{
         let LabelAndId=new Map()
         Object.entries(resultRequest.data).forEach(([clé, valeur])=>{
@@ -44,7 +43,27 @@ async function GetAllUnreadCounts(tokenApi,listId){
     })
 }
 
+async function GetAllUnreadArticle(tokenApi,streamIdtoken,numberarticle = 10){
+    let resultRequest = await axios.get("https://cloud.feedly.com/v3/streams/contents?streamId="+streamIdtoken+"&unreadOnly=true"+"&count="+numberarticle,{
+        headers: {'Authorization': tokenApi}
+    })
+    let Allvalue = resultRequest.data.items
+    return new Promise(async (resolve)=>{
+        let ListNewArticle=new Map()
+        Object.entries(Allvalue).forEach(([key,valu])=>{
+            ListNewArticle.set(valu.title,valu.canonicalUrl)
+        })
+        while(ListNewArticle.size !== Allvalue.length){
+            await sleep(1000)
+        }
+        if(ListNewArticle.size === Allvalue.length){
+            resolve(ListNewArticle)
+        }
+    })
+    
+}
 
 
 module.exports.GetAllFolder = GetAllFolder;
 module.exports.GetAllUnreadCounts=GetAllUnreadCounts;
+module.exports.GetAllUnreadArticle=GetAllUnreadArticle;

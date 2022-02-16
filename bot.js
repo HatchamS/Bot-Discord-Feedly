@@ -59,11 +59,16 @@ CreateAllChilldrenNeed = (listChannel,listNewChannel,Request)=> {
 
   })
 }
-SendAllMessageToChannel = async (ActiveChannel,ObjectNameChannelAndId,AllmessageToSend,nameTargetChannel) => {
+SendAllMessageToChannel = async (ActiveChannel,ObjectNameChannelAndId,Title,Url,nameTargetChannel) => {
+  console.log(nameTargetChannel)
   let IdTargetChannel = ObjectNameChannelAndId[nameTargetChannel];
+  
+  console.log(IdTargetChannel)
   let ChannelToSendMessage= await ActiveChannel.fetch(IdTargetChannel);
-  //let FormatedMessage = AllmessageToSend.join('\n')
-  return await ChannelToSendMessage.send("Nombre de nouveau article: "+AllmessageToSend);
+  
+  await ChannelToSendMessage.send({
+    content:`${Title} \n ${Url} \n\n`
+  });
 }
 zipMapToObject=(mapIterator,array)=>{
   let finalObject={}
@@ -73,17 +78,10 @@ zipMapToObject=(mapIterator,array)=>{
   })
   return finalObject
 }
-fusionMap=(MapOne,MapTwo)=>{
-  let finalObject={}
-  MapOne.forEach((value, key, map) => {
-    finalObject[value]=MapTwo.get(key)
-  })
-  return finalObject
-}
-
 async function Main(Client){
   let sectionFeedly = await FeedlyApp.GetAllFolder(config.tokenFeedly); //get label value and his id key
   let NewArticle = await FeedlyApp.GetAllUnreadCounts(config.tokenFeedly,sectionFeedly)
+
   if (NewArticle.values().next() === true){
     console.log("Pas de Nouveau Articles")
   }else{
@@ -100,20 +98,31 @@ async function Main(Client){
     let refrechChildrenId = GetAllChildren(CategoryChannelTarget,"id");
     
     let nammeChannelAndIsId = zipMapToObject(sectionFeedly,refrechChildrenId)
-    let DataSend = fusionMap(sectionFeedly,NewArticle)
     
-  
-    for (let [key, value] of Object.entries(DataSend)) {
-      await SendAllMessageToChannel(ChannelsClient,nammeChannelAndIsId,value,key)
-    }
+    //sectionFeedly.forEach(async (FolderName, idFeedly, map) =>{
+      
+    //let NumberNewArticle = NewArticle.get(idFeedly)
+
+    let DataSend = await FeedlyApp.GetAllUnreadArticle(config.tokenFeedly,'user/0f05b40a-f764-439a-9ee3-2abec81277e2/category/c66d1291-64f1-401c-8f89-041749f625bd',10)
+    
+    DataSend.forEach(async (value, key, map) =>{
+      
+      await SendAllMessageToChannel(ChannelsClient,nammeChannelAndIsId,key,value,"général")
+
+    })
+
+    //})
+
+    
+
     console.log("Tous les messages envoyés");
-    Client.destroy()
+    //Client.destroy()
 
   }
 
 }
 
-bot.on('ready',  () =>{
+bot.on('ready', () =>{
   Main(bot);
 })
 bot.login(config.BotToken);
