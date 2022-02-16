@@ -37,14 +37,15 @@ CreateAllChilldrenNeed = (listChannel,listNewChannel,Request)=> {
     let targetNumberChannel=numberchildren
     
     let arrayChildrenName = GetAllChildren(CategoryChannel,"name");
-    listNewChannel.forEach(element => {
-      if (!arrayChildrenName.includes(element)){
-        CreateChannel(listChannel,element,CategoryChannel.id,textChannel);
+    for (let nameChannel of listNewChannel) {
+      if (!arrayChildrenName.includes(nameChannel)){
+        CreateChannel(listChannel,nameChannel,CategoryChannel.id,textChannel);
         targetNumberChannel++
       }else{
-        console.log(element+" existe déjà dans le salon "+categoryName);
+        console.log(nameChannel+" existe déjà dans le salon "+categoryName);
       }
-    })
+    }
+    
     while (numberchildren !== targetNumberChannel) {
       numberchildren = CategoryChannel.children.size;
       await sleep(1000)
@@ -61,39 +62,55 @@ CreateAllChilldrenNeed = (listChannel,listNewChannel,Request)=> {
 SendAllMessageToChannel = async (ActiveChannel,ObjectNameChannelAndId,AllmessageToSend,nameTargetChannel) => {
   let IdTargetChannel = ObjectNameChannelAndId[nameTargetChannel];
   let ChannelToSendMessage= await ActiveChannel.fetch(IdTargetChannel);
-  let FormatedMessage = AllmessageToSend.join('\n')
-  return await ChannelToSendMessage.send(FormatedMessage);
+  //let FormatedMessage = AllmessageToSend.join('\n')
+  return await ChannelToSendMessage.send("Nombre de nouveau article: "+AllmessageToSend);
 }
-zipTwoArrayToObject=(arrayOne,arrayTwo)=>{
+zipMapToObject=(mapIterator,array)=>{
   let finalObject={}
-  arrayOne.forEach((element,index) => {
-      finalObject[element]=arrayTwo[index]
+  let Compteur = 0
+  mapIterator.forEach((element,index,map) => {
+      finalObject[element]=array[Compteur++]
+  })
+  return finalObject
+}
+fusionMap=(MapOne,MapTwo)=>{
+  let finalObject={}
+  MapOne.forEach((value, key, map) => {
+    finalObject[value]=MapTwo.get(key)
   })
   return finalObject
 }
 
-
 async function Main(Client){
-  let sectionFeedly = await FeedlyApp.GetAllBoards(config.tokenFeedly); 
-  console.log(sectionFeedly);
-  let serv=Client.guilds.cache;
-  let guildID = Client.guilds.cache.keys().next().value;
-  let ChannelsClient=Client.channels;
-  let Request = serv.get(guildID).channels
+  let sectionFeedly = await FeedlyApp.GetAllFolder(config.tokenFeedly); //get label value and his id key
+  let NewArticle = await FeedlyApp.GetAllUnreadCounts(config.tokenFeedly,sectionFeedly)
+  if (NewArticle.values().next() === true){
+    console.log("Pas de Nouveau Articles")
+  }else{
+    let serv=Client.guilds.cache;
+    let guildID = Client.guilds.cache.keys().next().value;
+    let Request = serv.get(guildID).channels
+    
+    await CreateAllChilldrenNeed(Request,sectionFeedly.values(),Request);
+    console.log("Création des channels terminés");
+
+    
+    let ChannelsClient=Client.channels;
+    let CategoryChannelTarget = await GetTargetChannelByName(categoryName,Request.fetch(),"id");
+    let refrechChildrenId = GetAllChildren(CategoryChannelTarget,"id");
+    
+    let nammeChannelAndIsId = zipMapToObject(sectionFeedly,refrechChildrenId)
+    let DataSend = fusionMap(sectionFeedly,NewArticle)
+    
   
-  let CategoryChannelTarget = await GetTargetChannelByName(categoryName,Request.fetch(),"id");
+    for (let [key, value] of Object.entries(DataSend)) {
+      await SendAllMessageToChannel(ChannelsClient,nammeChannelAndIsId,value,key)
+    }
+    console.log("Tous les messages envoyés");
+    Client.destroy()
 
-  await CreateAllChilldrenNeed(Request,sectionFeedly,Request);
-  console.log("Création des channels terminés");
+  }
 
-  //let refrechChildrenId = GetAllChildren(CategoryChannelTarget,"id");
-  //let nammeChannelAndIsId = zipTwoArrayToObject(sectionFeedly,refrechChildrenId)
-
-  //for (let [key, value] of Object.entries(DataInput)) {
-    //await SendAllMessageToChannel(ChannelsClient,nammeChannelAndIsId,value,key)
-  //}
-  //console.log("Tous les messages envoyés");
-  //Client.destroy()
 }
 
 bot.on('ready',  () =>{
