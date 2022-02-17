@@ -48,17 +48,18 @@ async function GetAllUnreadArticle(tokenApi,streamIdtoken,numberarticle = 10){
         headers: {'Authorization': tokenApi}
     })
     let Allvalue = resultRequest.data.items
+    
     return new Promise(async (resolve)=>{
         let ListNewArticle=new Map()
         Object.entries(Allvalue).forEach(([key,valu])=>{
-            ListNewArticle.set(valu.title,valu.canonicalUrl)
+            let ValueImg = valu.visual===undefined ? "none":valu.visual.url
+            ListNewArticle.set(valu.origin["title"],[valu.canonicalUrl,valu.title,ValueImg])
+
         })
-        while(ListNewArticle.size !== Allvalue.length){
-            await sleep(1000)
-        }
-        if(ListNewArticle.size === Allvalue.length){
-            resolve(ListNewArticle)
-        }
+        
+        
+        resolve(ListNewArticle)
+        
     })
     
 }

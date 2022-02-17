@@ -21,10 +21,10 @@ CreateChannel = async (GuildChannelManager,NameNewChannel,idCategoryChannel,type
   newChannel.setParent(idCategoryChannel);
 }
 
-GetAllChildren = (categoryChannel,property) =>{
-  let ListNameChildren=[];
+GetAllChildren = (categoryChannel) =>{
+  let ListNameChildren={};
   categoryChannel.children.forEach((e)=>{
-    ListNameChildren.push(e[property]);
+    ListNameChildren[e.name]=e.id;
   })
   return ListNameChildren;
 }
@@ -36,9 +36,9 @@ CreateAllChilldrenNeed = (listChannel,listNewChannel,Request)=> {
     var numberchildren = CategoryChannel.children.size;
     let targetNumberChannel=numberchildren
     
-    let arrayChildrenName = GetAllChildren(CategoryChannel,"name");
+    let arrayChildrenName = GetAllChildren(CategoryChannel);
     for (let nameChannel of listNewChannel) {
-      if (!arrayChildrenName.includes(nameChannel)){
+      if (!Object.keys(arrayChildrenName).includes(nameChannel)){
         CreateChannel(listChannel,nameChannel,CategoryChannel.id,textChannel);
         targetNumberChannel++
       }else{
@@ -59,24 +59,29 @@ CreateAllChilldrenNeed = (listChannel,listNewChannel,Request)=> {
 
   })
 }
-SendAllMessageToChannel = async (ActiveChannel,ObjectNameChannelAndId,Title,Url,nameTargetChannel) => {
-  console.log(nameTargetChannel)
+SendAllMessageEmbedToChannel = async (ActiveChannel,ObjectNameChannelAndId,TitleArticle,AllPropertyEmbed,nameTargetChannel) => {
+  
   let IdTargetChannel = ObjectNameChannelAndId[nameTargetChannel];
-  
-  console.log(IdTargetChannel)
   let ChannelToSendMessage= await ActiveChannel.fetch(IdTargetChannel);
-  
+  if(AllPropertyEmbed.at(2)==="none"){
+    var NewEmbed = new Discord.MessageEmbed()
+    .setTitle(TitleArticle)
+    .setURL(AllPropertyEmbed.at(0))
+    .setDescription(AllPropertyEmbed.at(1))
+    .setTimestamp()
+  }else{
+    var NewEmbed = new Discord.MessageEmbed()
+    .setTitle(TitleArticle)
+    .setURL(AllPropertyEmbed.at(0))
+    .setDescription(AllPropertyEmbed.at(1))
+    .setImage(AllPropertyEmbed.at(2))
+    .setTimestamp()
+    
+
+  }
   await ChannelToSendMessage.send({
-    content:`${Title} \n ${Url} \n\n`
+    embeds:[NewEmbed]
   });
-}
-zipMapToObject=(mapIterator,array)=>{
-  let finalObject={}
-  let Compteur = 0
-  mapIterator.forEach((element,index,map) => {
-      finalObject[element]=array[Compteur++]
-  })
-  return finalObject
 }
 async function Main(Client){
   let sectionFeedly = await FeedlyApp.GetAllFolder(config.tokenFeedly); //get label value and his id key
@@ -92,28 +97,28 @@ async function Main(Client){
     await CreateAllChilldrenNeed(Request,sectionFeedly.values(),Request);
     console.log("Création des channels terminés");
 
-    
     let ChannelsClient=Client.channels;
     let CategoryChannelTarget = await GetTargetChannelByName(categoryName,Request.fetch(),"id");
-    let refrechChildrenId = GetAllChildren(CategoryChannelTarget,"id");
     
-    let nammeChannelAndIsId = zipMapToObject(sectionFeedly,refrechChildrenId)
+    let nammeChannelAndIsId = GetAllChildren(CategoryChannelTarget)
     
-    //sectionFeedly.forEach(async (FolderName, idFeedly, map) =>{
+    sectionFeedly.forEach(async (FolderName, idFeedly, map) =>{
       
-    //let NumberNewArticle = NewArticle.get(idFeedly)
+      let NumberNewArticle = NewArticle.get(idFeedly)
+      
 
-    let DataSend = await FeedlyApp.GetAllUnreadArticle(config.tokenFeedly,'user/0f05b40a-f764-439a-9ee3-2abec81277e2/category/c66d1291-64f1-401c-8f89-041749f625bd',10)
-    
-    DataSend.forEach(async (value, key, map) =>{
+      let DataSend = await FeedlyApp.GetAllUnreadArticle(config.tokenFeedly,idFeedly,10)
       
-      await SendAllMessageToChannel(ChannelsClient,nammeChannelAndIsId,key,value,"général")
+      
+      
+      
+      DataSend.forEach(async (value, key, map) =>{
+        
+        await SendAllMessageEmbedToChannel(ChannelsClient,nammeChannelAndIsId,key,value,FolderName)
+
+      })
 
     })
-
-    //})
-
-    
 
     console.log("Tous les messages envoyés");
     //Client.destroy()
