@@ -98,34 +98,39 @@ async function Main(Client){
     let CategoryChannelTarget = await GetTargetChannelByName(categoryName,Request.fetch(),"id");
     
     let nammeChannelAndIsId = GetAllChildren(CategoryChannelTarget);
+
     
     sectionFeedly.forEach(async (FolderName, idFeedly, map) =>{
+
       
       let NumberNewArticle = NewArticle.get(idFeedly);
-      console.log("Nombre nouveau article "+ NumberNewArticle)
 
 
       let DataSend = await FeedlyApp.GetAllUnreadArticle(config.tokenFeedly,idFeedly,NumberNewArticle)
-      console.log(DataSend)
       DataSend.forEach(async (value, key, map) =>{
 
         
         await SendAllMessageEmbedToChannel(ChannelsClient,nammeChannelAndIsId,value,FolderName)
         await FeedlyApp.MarkCategoryAsRead(config.tokenFeedly,idFeedly)
-
+        
       })
+      
+      
 
     })
 
     console.log("Tous les messages envoyés");
+    return await sleep(60000);
     
-    //Client.destroy()
+    
 
   }
 
 }
 
 bot.on('ready', () =>{
-  Main(bot);
+  Main(bot).then((event)=>{
+    bot.destroy()
+  });
 })
 bot.login(config.BotToken);
