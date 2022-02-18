@@ -54,27 +54,24 @@ CreateAllChilldrenNeed = (listChannel,listNewChannel,Request)=> {
     if(numberchildren==targetNumberChannel){
       resolve()
     }
-    
-    
-
   })
 }
-SendAllMessageEmbedToChannel = async (ActiveChannel,ObjectNameChannelAndId,TitleArticle,AllPropertyEmbed,nameTargetChannel) => {
+SendAllMessageEmbedToChannel = async (ActiveChannel,ObjectNameChannelAndId,AllPropertyEmbed,nameTargetChannel) => {
   
   let IdTargetChannel = ObjectNameChannelAndId[nameTargetChannel];
   let ChannelToSendMessage= await ActiveChannel.fetch(IdTargetChannel);
-  if(AllPropertyEmbed.at(2)==="none"){
+  if(AllPropertyEmbed.at(3)==="none"){
     var NewEmbed = new Discord.MessageEmbed()
-    .setTitle(TitleArticle)
-    .setURL(AllPropertyEmbed.at(0))
-    .setDescription(AllPropertyEmbed.at(1))
+    .setTitle(AllPropertyEmbed.at(0))
+    .setURL(AllPropertyEmbed.at(1))
+    .setDescription(AllPropertyEmbed.at(2))
     .setTimestamp()
   }else{
     var NewEmbed = new Discord.MessageEmbed()
-    .setTitle(TitleArticle)
-    .setURL(AllPropertyEmbed.at(0))
-    .setDescription(AllPropertyEmbed.at(1))
-    .setImage(AllPropertyEmbed.at(2))
+    .setTitle(AllPropertyEmbed.at(0))
+    .setURL(AllPropertyEmbed.at(1))
+    .setDescription(AllPropertyEmbed.at(2))
+    .setImage(AllPropertyEmbed.at(3))
     .setTimestamp()
     
 
@@ -92,7 +89,7 @@ async function Main(Client){
   }else{
     let serv=Client.guilds.cache;
     let guildID = Client.guilds.cache.keys().next().value;
-    let Request = serv.get(guildID).channels
+    let Request = serv.get(guildID).channels;
     
     await CreateAllChilldrenNeed(Request,sectionFeedly.values(),Request);
     console.log("Création des channels terminés");
@@ -100,27 +97,28 @@ async function Main(Client){
     let ChannelsClient=Client.channels;
     let CategoryChannelTarget = await GetTargetChannelByName(categoryName,Request.fetch(),"id");
     
-    let nammeChannelAndIsId = GetAllChildren(CategoryChannelTarget)
+    let nammeChannelAndIsId = GetAllChildren(CategoryChannelTarget);
     
     sectionFeedly.forEach(async (FolderName, idFeedly, map) =>{
       
-      let NumberNewArticle = NewArticle.get(idFeedly)
-      
+      let NumberNewArticle = NewArticle.get(idFeedly);
+      console.log("Nombre nouveau article "+ NumberNewArticle)
 
-      let DataSend = await FeedlyApp.GetAllUnreadArticle(config.tokenFeedly,idFeedly,10)
-      
-      
-      
-      
+
+      let DataSend = await FeedlyApp.GetAllUnreadArticle(config.tokenFeedly,idFeedly,NumberNewArticle)
+      console.log(DataSend)
       DataSend.forEach(async (value, key, map) =>{
+
         
-        await SendAllMessageEmbedToChannel(ChannelsClient,nammeChannelAndIsId,key,value,FolderName)
+        await SendAllMessageEmbedToChannel(ChannelsClient,nammeChannelAndIsId,value,FolderName)
+        await FeedlyApp.MarkCategoryAsRead(config.tokenFeedly,idFeedly)
 
       })
 
     })
 
     console.log("Tous les messages envoyés");
+    
     //Client.destroy()
 
   }

@@ -32,13 +32,13 @@ async function GetAllUnreadCounts(tokenApi,listId){
     return new Promise(async (resolve)=>{
         let NumberUnreadCounts=new Map()
         Object.entries(FilterData).forEach(([clé, valeur])=>{
-            NumberUnreadCounts.set(valeur.id,valeur.count)
+            NumberUnreadCounts.set(valeur.id,valeur.count);
         })
         while(NumberUnreadCounts.size !== FilterData.length){
-            await sleep(1000)
+            await sleep(1000);
         }
         if (NumberUnreadCounts.size === FilterData.length){
-            resolve(NumberUnreadCounts)
+            resolve(NumberUnreadCounts);
         }
     })
 }
@@ -47,24 +47,51 @@ async function GetAllUnreadArticle(tokenApi,streamIdtoken,numberarticle = 10){
     let resultRequest = await axios.get("https://cloud.feedly.com/v3/streams/contents?streamId="+streamIdtoken+"&unreadOnly=true"+"&count="+numberarticle,{
         headers: {'Authorization': tokenApi}
     })
-    let Allvalue = resultRequest.data.items
+    let Allvalue = resultRequest.data.items;
     
     return new Promise(async (resolve)=>{
         let ListNewArticle=new Map()
+        let compteur=0
         Object.entries(Allvalue).forEach(([key,valu])=>{
+            
             let ValueImg = valu.visual===undefined ? "none":valu.visual.url
-            ListNewArticle.set(valu.origin["title"],[valu.canonicalUrl,valu.title,ValueImg])
+            ListNewArticle.set(compteur++,[valu.origin["title"],valu.canonicalUrl,valu.title,ValueImg]);
 
         })
         
+
+        while (Object.entries(Allvalue).length !== ListNewArticle.size){
+            
+            await sleep(1500)
+        }
         
-        resolve(ListNewArticle)
+        if(Object.entries(Allvalue).length === ListNewArticle.size){
+            resolve(ListNewArticle)
+        }
         
+        
+        
+        
+    }) 
+}
+
+async function MarkCategoryAsRead(tokenApi,FeedlyId){
+    let resultRequest = await axios({
+        method: 'post',
+        url: 'https://cloud.feedly.com/v3/markers',
+        headers: {'Authorization': tokenApi},
+        data: {
+            "action": "markAsRead",
+            "type": "categories",
+            "categoryIds": [FeedlyId],
+            "asOf": Date.now()
+        }
     })
-    
+    return resultRequest
 }
 
 
 module.exports.GetAllFolder = GetAllFolder;
 module.exports.GetAllUnreadCounts=GetAllUnreadCounts;
 module.exports.GetAllUnreadArticle=GetAllUnreadArticle;
+module.exports.MarkCategoryAsRead=MarkCategoryAsRead;
