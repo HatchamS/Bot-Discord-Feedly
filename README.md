@@ -6,6 +6,7 @@ Les catégories sont représentées par des channels sur le serveur discord.
 IMPORTANT :
 Ne pas mettre de majuscule dans les nom de dossier feedly,car discord n'accepte pas les majuscules.
 Aussi il ne faut pas d'espace dans le nom de votre catégory sur feedly.
+Si vous supprimez un folder sur feedly il faut alors le supprimer le channel discord qui lui correspond.
 
 
 lien obtenir token feedly https://developer.feedly.com/v3/developer/
