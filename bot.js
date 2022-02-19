@@ -29,32 +29,34 @@ GetAllChildren = (categoryChannel) =>{
   return ListNameChildren;
 }
 
-CreateAllChilldrenNeed = (listChannel,listNewChannel,Request)=> {
-  return new Promise(async (resolve)=>{
-    let RequestFetch = await Request.fetch()
-    let CategoryChannel = await GetTargetChannelByName(categoryName,RequestFetch);
-    var numberchildren = CategoryChannel.children.size;
-    let targetNumberChannel=numberchildren
+CreateAllChilldrenNeed = async (listChannel,listNewChannel,Request)=> {
+  
+  let RequestFetch = await Request.fetch()
+  let CategoryChannel = await GetTargetChannelByName(categoryName,RequestFetch);
+  var numberchildren = CategoryChannel.children.size;
+  let targetNumberChannel=numberchildren
+  
+  let arrayChildrenName = GetAllChildren(CategoryChannel);
+
+  for (let nameChannel of listNewChannel) {
+
+    if (!Object.keys(arrayChildrenName).includes(nameChannel)){
+      CreateChannel(listChannel,nameChannel,CategoryChannel.id,textChannel);
+      targetNumberChannel++
+    }else{
+      console.log(nameChannel+" existe déjà dans le salon "+categoryName);
+    }
+  }
+  
+  while (numberchildren !== targetNumberChannel) {
+    numberchildren = CategoryChannel.children.size;
+    await sleep(1000);
     
-    let arrayChildrenName = GetAllChildren(CategoryChannel);
-    for (let nameChannel of listNewChannel) {
-      if (!Object.keys(arrayChildrenName).includes(nameChannel)){
-        CreateChannel(listChannel,nameChannel,CategoryChannel.id,textChannel);
-        targetNumberChannel++
-      }else{
-        console.log(nameChannel+" existe déjà dans le salon "+categoryName);
-      }
-    }
-    
-    while (numberchildren !== targetNumberChannel) {
-      numberchildren = CategoryChannel.children.size;
-      await sleep(1000)
-      
-    }
-    if(numberchildren==targetNumberChannel){
-      resolve()
-    }
-  })
+  }
+  if(numberchildren==targetNumberChannel){
+    return 0;
+  }
+  
 }
 SendAllMessageEmbedToChannel = async (ActiveChannel,ObjectNameChannelAndId,AllPropertyEmbed,nameTargetChannel) => {
   

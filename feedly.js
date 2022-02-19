@@ -6,21 +6,21 @@ async function GetAllFolder(tokenApi) {
     let resultRequest = await axios.get("https://cloud.feedly.com/v3/collections",{
         headers: {'Authorization': tokenApi}
     })
-    return new Promise(async (resolve)=>{
-        let LabelAndId=new Map()
-        Object.entries(resultRequest.data).forEach(([clé, valeur])=>{
+    
+    let LabelAndId=new Map()
+    Object.entries(resultRequest.data).forEach(([clé, valeur])=>{
 
-            if(valeur.label !== undefined){
-                LabelAndId.set(valeur.id,valeur.label);
-            }
-        })
-        while(LabelAndId.size!==resultRequest.data.length){
-            await sleep(1000)
-        }
-        if(LabelAndId.size===resultRequest.data.length){
-            resolve(LabelAndId)
+        if(valeur.label !== undefined){
+            LabelAndId.set(valeur.id,valeur.label);
         }
     })
+    while(LabelAndId.size!==resultRequest.data.length){
+        await sleep(1000)
+    }
+    if(LabelAndId.size===resultRequest.data.length){
+        return LabelAndId
+    }
+    
 
 };
 async function GetAllUnreadCounts(tokenApi,listId){
@@ -29,18 +29,18 @@ async function GetAllUnreadCounts(tokenApi,listId){
     })
     let Allvalue = Object.values(resultRequest.data)
     let FilterData = Allvalue[0].filter(input=>input.count>0 && listId.has(input.id))
-    return new Promise(async (resolve)=>{
-        let NumberUnreadCounts=new Map()
-        Object.entries(FilterData).forEach(([clé, valeur])=>{
-            NumberUnreadCounts.set(valeur.id,valeur.count);
-        })
-        while(NumberUnreadCounts.size !== FilterData.length){
-            await sleep(1000);
-        }
-        if (NumberUnreadCounts.size === FilterData.length){
-            resolve(NumberUnreadCounts);
-        }
+    
+    let NumberUnreadCounts=new Map()
+    Object.entries(FilterData).forEach(([clé, valeur])=>{
+        NumberUnreadCounts.set(valeur.id,valeur.count);
     })
+    while(NumberUnreadCounts.size !== FilterData.length){
+        await sleep(1000);
+    }
+    if (NumberUnreadCounts.size === FilterData.length){
+        return NumberUnreadCounts;
+    }
+    
 }
 
 async function GetAllUnreadArticle(tokenApi,streamIdtoken,numberarticle = 10){
@@ -49,30 +49,25 @@ async function GetAllUnreadArticle(tokenApi,streamIdtoken,numberarticle = 10){
     })
     let Allvalue = resultRequest.data.items;
     
-    return new Promise(async (resolve)=>{
-        let ListNewArticle=new Map()
-        let compteur=0
-        Object.entries(Allvalue).forEach(([key,valu])=>{
-            
-            let ValueImg = valu.visual===undefined ? "none":valu.visual.url
-            ListNewArticle.set(compteur++,[valu.origin["title"],valu.canonicalUrl,valu.title,ValueImg]);
+    
+    let ListNewArticle=new Map()
+    let compteur=0
+    Object.entries(Allvalue).forEach(([key,valu])=>{
+        
+        let ValueImg = valu.visual===undefined ? "none":valu.visual.url
+        ListNewArticle.set(compteur++,[valu.origin["title"],valu.canonicalUrl,valu.title,ValueImg]);
 
-        })
-        
+    })
+    
 
-        while (Object.entries(Allvalue).length !== ListNewArticle.size){
-            
-            await sleep(1500)
-        }
+    while (Object.entries(Allvalue).length !== ListNewArticle.size){
         
-        if(Object.entries(Allvalue).length === ListNewArticle.size){
-            resolve(ListNewArticle)
-        }
-        
-        
-        
-        
-    }) 
+        await sleep(1500)
+    }
+    
+    if(Object.entries(Allvalue).length === ListNewArticle.size){
+        return ListNewArticle;
+    } 
 }
 
 async function MarkCategoryAsRead(tokenApi,FeedlyId){
