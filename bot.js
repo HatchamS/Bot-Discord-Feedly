@@ -73,8 +73,9 @@ async function Main(Client){
   let sectionFeedly = await FeedlyApp.GetAllFolder(config.tokenFeedly); //get label value and his id key
   let NewArticle = await FeedlyApp.GetAllUnreadCounts(config.tokenFeedly,sectionFeedly)
 
-  if (NewArticle.values().next() === true){
+  if (NewArticle.values().next().done === true){
     console.log("Pas de Nouveau Articles")
+    return 0;
   }else{
     let serv=Client.guilds.cache;
     let guildID = Client.guilds.cache.keys().next().value;
@@ -88,20 +89,14 @@ async function Main(Client){
     
     let nammeChannelAndIsId = GetAllChildren(CategoryChannelTarget);
 
-    
     sectionFeedly.forEach(async (FolderName, idFeedly, map) =>{
-
       
       let NumberNewArticle = NewArticle.get(idFeedly);
 
-
       let DataSend = await FeedlyApp.GetAllUnreadArticle(config.tokenFeedly,idFeedly,NumberNewArticle)
       DataSend.forEach(async (value, key, map) =>{
-
-        
         await SendAllMessageEmbedToChannel(ChannelsClient,nammeChannelAndIsId,value,FolderName);
         await FeedlyApp.MarkCategoryAsRead(config.tokenFeedly,idFeedly);
-        
       })
     })
     return await sleep(60000);
