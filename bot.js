@@ -6,10 +6,6 @@ const config = require('./config.json');
 const FeedlyApp = require("./feedly.js")
 
 
-const sleep = (milliseconds) => {
-  return new Promise(resolve => setTimeout(resolve, milliseconds))
-}
-
 GetTargetChannelByName = async (Name,FetchRequest) => {
   let listeChannel= await FetchRequest; 
   let Channel = listeChannel.find(chanenel=>chanenel.name==Name);
@@ -89,17 +85,17 @@ async function Main(Client){
     
     let nammeChannelAndIsId = GetAllChildren(CategoryChannelTarget);
 
-    sectionFeedly.forEach(async (FolderName, idFeedly, map) =>{
-      
-      let NumberNewArticle = NewArticle.get(idFeedly);
+    for (const [idFeedly,FolderName] of sectionFeedly){
+    
+    let NumberNewArticle = NewArticle.get(idFeedly);
 
-      let DataSend = await FeedlyApp.GetAllUnreadArticle(config.tokenFeedly,idFeedly,NumberNewArticle)
-      DataSend.forEach(async (value, key, map) =>{
-        await SendAllMessageEmbedToChannel(ChannelsClient,nammeChannelAndIsId,value,FolderName);
-        await FeedlyApp.MarkCategoryAsRead(config.tokenFeedly,idFeedly);
-      })
-    })
-    return await sleep(60000);
+    let DataSend = await FeedlyApp.GetAllUnreadArticle(config.tokenFeedly,idFeedly,NumberNewArticle)
+
+    for(const [key,value] of DataSend){
+      await SendAllMessageEmbedToChannel(ChannelsClient,nammeChannelAndIsId,value,FolderName);
+      await FeedlyApp.MarkCategoryAsRead(config.tokenFeedly,idFeedly);
+      }
+    }
   }
 };
 
