@@ -14,12 +14,9 @@ async function GetAllFolder(tokenApi) {
             LabelAndId.set(valeur.id,valeur.label);
         }
     })
-    while(LabelAndId.size!==resultRequest.data.length){
-        await sleep(1000)
-    }
-    if(LabelAndId.size===resultRequest.data.length){
-        return LabelAndId
-    }
+
+    return LabelAndId
+    
     
 
 };
@@ -34,12 +31,9 @@ async function GetAllUnreadCounts(tokenApi,listId){
     Object.entries(FilterData).forEach(([clé, valeur])=>{
         NumberUnreadCounts.set(valeur.id,valeur.count);
     })
-    while(NumberUnreadCounts.size !== FilterData.length){
-        await sleep(1000);
-    }
-    if (NumberUnreadCounts.size === FilterData.length){
-        return NumberUnreadCounts;
-    }
+    
+    return NumberUnreadCounts;
+    
     
 }
 
@@ -60,14 +54,8 @@ async function GetAllUnreadArticle(tokenApi,streamIdtoken,numberarticle = 10){
     })
     
 
-    while (Object.entries(Allvalue).length !== ListNewArticle.size){
-        
-        await sleep(1500)
-    }
-    
-    if(Object.entries(Allvalue).length === ListNewArticle.size){
-        return ListNewArticle;
-    } 
+    return ListNewArticle;
+     
 }
 
 async function MarkCategoryAsRead(tokenApi,FeedlyId){
