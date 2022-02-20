@@ -18,7 +18,7 @@ GetTargetChannelByName = async (Name,FetchRequest) => {
 
 CreateChannel = async (GuildChannelManager,NameNewChannel,idCategoryChannel,typeChannel) =>{
   let newChannel = await GuildChannelManager.create(NameNewChannel,{type:typeChannel});
-  newChannel.setParent(idCategoryChannel);
+  return newChannel.setParent(idCategoryChannel);
 }
 
 GetAllChildren = (categoryChannel) =>{
@@ -30,33 +30,20 @@ GetAllChildren = (categoryChannel) =>{
 }
 
 CreateAllChilldrenNeed = async (listChannel,listNewChannel,Request)=> {
-  
   let RequestFetch = await Request.fetch()
   let CategoryChannel = await GetTargetChannelByName(categoryName,RequestFetch);
-  var numberchildren = CategoryChannel.children.size;
-  let targetNumberChannel=numberchildren
   
   let arrayChildrenName = GetAllChildren(CategoryChannel);
 
   for (let nameChannel of listNewChannel) {
 
     if (!Object.keys(arrayChildrenName).includes(nameChannel)){
-      CreateChannel(listChannel,nameChannel,CategoryChannel.id,textChannel);
-      targetNumberChannel++
+      await CreateChannel(listChannel,nameChannel,CategoryChannel.id,textChannel);
+      
     }else{
       console.log(nameChannel+" existe déjà dans le salon "+categoryName);
     }
-  }
-  
-  while (numberchildren !== targetNumberChannel) {
-    numberchildren = CategoryChannel.children.size;
-    await sleep(1000);
-    
-  }
-  if(numberchildren==targetNumberChannel){
-    return 0;
-  }
-  
+  } 
 }
 SendAllMessageEmbedToChannel = async (ActiveChannel,ObjectNameChannelAndId,AllPropertyEmbed,nameTargetChannel) => {
   
@@ -112,27 +99,19 @@ async function Main(Client){
       DataSend.forEach(async (value, key, map) =>{
 
         
-        await SendAllMessageEmbedToChannel(ChannelsClient,nammeChannelAndIsId,value,FolderName)
-        await FeedlyApp.MarkCategoryAsRead(config.tokenFeedly,idFeedly)
+        await SendAllMessageEmbedToChannel(ChannelsClient,nammeChannelAndIsId,value,FolderName);
+        await FeedlyApp.MarkCategoryAsRead(config.tokenFeedly,idFeedly);
         
       })
-      
-      
-
     })
-
-    console.log("Tous les messages envoyés");
     return await sleep(60000);
-    
-    
-
   }
-
-}
+};
 
 bot.on('ready', () =>{
   Main(bot).then((event)=>{
+    console.log("Tous les messages envoyés");
     bot.destroy()
   });
-})
+});
 bot.login(config.BotToken);
